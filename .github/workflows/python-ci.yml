@@ -1,0 +1,44 @@
+# This workflow will install Python dependencies, run tests and other codechecks on Codecheck project
+
+name: Python Continous Integration
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+permissions:
+  contents: read
+
+jobs:
+  codecheck:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    name: Codecheck on ${{ matrix.os }}
+   
+    steps: 
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install uv and set up Python
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: '3.13'
+          activate-environment: "true"
+
+      - name: Run codecheck
+        run: | 
+          uv pip install nxp-codecheck
+          uv pip install -r requirements_dev.txt
+          tox --recreate -e py39,py313 -- --info-check copyright --info-check cspell
+
+      - name: Archive Results
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: Results-${{ matrix.python-version }}-${{ matrix.os }}
+          path: reports_codecheck
+        if: always() && job.status == 'failure'

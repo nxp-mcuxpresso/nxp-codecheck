@@ -1,0 +1,9 @@
+# package management
+build
+bump-my-version
+twine
+
+# testing
+tox
+tomli-w
+nxp_codecheck<1,>=0.3.13

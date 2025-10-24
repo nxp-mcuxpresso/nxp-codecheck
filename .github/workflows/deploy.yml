@@ -1,0 +1,46 @@
+# This workflow will build a package and publish it into PyPi
+
+name: Publish To PyPi
+
+on:
+  push:
+    tags:
+      - 'v*' # Create release if a tag with version is pushed
+
+jobs:
+  package:
+    name: Build Package
+    runs-on: ubuntu-latest
+    permissions: # Required by attest-build-provenance-github.
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Build and Check Package
+        uses: hynek/build-and-inspect-python-package@v2.12.0
+        with:
+          attest-build-provenance-github: 'true'
+
+  deploy:
+    name: Upload Release To PyPI
+    needs: [package]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/nxp-codecheck/
+    permissions:
+      id-token: write
+    steps:
+    - uses: actions/checkout@v4.2.2
+
+    - name: Download Package
+      uses: actions/download-artifact@v4.3.0
+      with:
+        name: Packages
+        path: dist
+
+    - name: Publish package to PyPI
+      uses: pypa/gh-action-pypi-publish@v1.13.0 # The authentication is provided by OpenID Connect: https://docs.pypi.org/trusted-publishers/adding-a-publisher/
