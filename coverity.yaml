@@ -1,0 +1,27 @@
+# Copyright 2025 NXP
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+capture:
+  languages:
+    include: [python]
+  files:
+    exclude-regex: "venv"
+
+analyze:
+  aggressiveness-level: high
+  cov-analyze-args: [--disable-sigma]
+
+commit:
+  connect:
+    url: https://coverity2.nxp.com:8443
+    stream: spsdk_codecheck_base
+    on-new-cert: distrust
+
+##############################################################
+# This section is not a part of regular Coverity configuration
+# Because of that Coverity will show some warnings
+reports:
+  project-name: "SPSDK Codecheck"
+  coverity-name: "SPSDK Codecheck"
+  types: [syn-integrity, cov-integrity, cov-security]
