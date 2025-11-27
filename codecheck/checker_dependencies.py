@@ -23,7 +23,7 @@ from urllib.parse import urlparse
 import packaging
 import prettytable
 import tomli
-from packaging.metadata import Metadata
+from packaging.metadata import InvalidMetadata, Metadata
 from packaging.requirements import Requirement
 from packaging.version import Version
 from typing_extensions import Self, TypeGuard
@@ -140,8 +140,12 @@ class LocalPackageLicense(LicenseBase):
             assert meta
             if meta.license:
                 return meta.license
-            if meta.license_expression:
-                return meta.license_expression
+            try:
+                if meta.license_expression:
+                    return meta.license_expression
+            except InvalidMetadata:
+                # Skip if license_expression raises an error
+                pass
             if meta.classifiers:
                 for classifier in meta.classifiers:
                     if "License :: OSI Approved :: " in classifier:
