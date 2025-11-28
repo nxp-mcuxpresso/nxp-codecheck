@@ -196,7 +196,7 @@ checkers:
         # check_paths: [] # The default check paths could be overrides by local settings
         info_only: false
         dependencies: []
-        conflicts: [BLACK, MYPY, ISORT]
+        conflicts: [BLACK, MYPY, ISORT, RUFF]
         inherit_failure: false
         fixer: fix_black_nb
         jupyter_notebook_checker: True
@@ -207,7 +207,7 @@ checkers:
         # check_paths: [] # The default check paths could be overrides by local settings
         info_only: false
         dependencies: []
-        conflicts: [BLACK, MYPY, ISORT, BLACK_NB]
+        conflicts: [BLACK, MYPY, ISORT, RUFF, BLACK_NB]
         inherit_failure: false
         fixer: fix_isort_nb
         jupyter_notebook_checker: True

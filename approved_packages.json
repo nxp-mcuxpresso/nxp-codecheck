@@ -360,7 +360,11 @@
       "name": "matplotlib-inline",
       "package": {
         "name": "matplotlib-inline",
-        "license": "BSD 3-Clause License"
+        "license": "UNKNOWN"
+      },
+      "github": {
+        "project_name": "ipython/matplotlib-inline",
+        "license": "BSD-3-Clause"
       }
     },
     {
