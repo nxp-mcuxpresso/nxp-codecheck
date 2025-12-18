@@ -8,6 +8,7 @@
 
 import argparse
 import csv
+import itertools
 import json
 import logging
 import os
@@ -82,6 +83,17 @@ class LicenseBase:
                 return spdx
         return None
 
+    @staticmethod
+    def get_spdx_from_name(license_name: str) -> Optional[str]:
+        """Get SPDX identifier from license name."""
+        spdx_config = load_spdx_config()
+        if license_name in spdx_config:
+            return license_name
+        for spdx, alternatives in spdx_config.items():
+            if license_name in alternatives:
+                return spdx
+        return None
+
     @abstractmethod
     def refresh(self) -> None:
         """Fetch the license from the source."""
@@ -136,8 +148,7 @@ class LocalPackageLicense(LicenseBase):
     def refresh(self) -> None:
         """Fetch the license from the source."""
 
-        def get_license() -> Optional[str]:
-            assert meta
+        def get_license(meta: Metadata) -> Optional[str]:  # pylint: disable=too-many-branches
             if meta.license:
                 return meta.license
             try:
@@ -150,12 +161,34 @@ class LocalPackageLicense(LicenseBase):
                 for classifier in meta.classifiers:
                     if "License :: OSI Approved :: " in classifier:
                         return classifier.removeprefix("License :: OSI Approved :: ")
+
+            # guess-work starts here if no explicit license found
+            all_license_names = list(itertools.chain(*self.spdx_config.values()))
+            all_license_names.extend(list(self.spdx_config.keys()))
+            all_license_names.sort(key=len, reverse=True)  # Sort to match longer names first
+
+            # Attempt to read license from license files if available
+            if hasattr(meta, "license_files") and meta.license_files:
+                meta_file = get_package_metadata_file(self.package_name)
+                for license_file_name in meta.license_files:
+                    license_file = meta_file.parent / "licenses" / license_file_name
+                    if license_file.exists():
+                        license_content = license_file.read_text(encoding="utf-8").splitlines()[0]
+                        if any(lic in license_content for lic in all_license_names):
+                            return self.get_spdx_from_name(license_content)
+
+            # try to guess license from package's description
+            if meta.description:
+                for lic_name in all_license_names:
+                    if lic_name in meta.description:
+                        return self.get_spdx_from_name(lic_name)
+
             return None
 
         meta = get_package_metadata(name=self.package_name)
         if meta is None:
             raise NameError(f"Package {self.package_name} is not installed")
-        lic = get_license()
+        lic = get_license(meta)
         if not lic:
             raise ValueError(f"Package {self.package_name} doesn't have License in Metadata")
         self.license = lic.split("\n")[0]
@@ -403,16 +436,16 @@ class DependenciesList(List[DependencyInfo]):
         return table.get_string()
 
 
-def get_package_metadata(name: str) -> Optional[Metadata]:
-    """Get Python package metadata.
+def get_package_metadata_file(name: str) -> Path:
+    """Find package metadata file with case-insensitive search.
 
     :param name: Name of package
-    :return: Package metadata
+    :return: Path to metadata file
     """
     new_name = name.replace("-", "_")
     gen = Path(LIBRARY_PATH).glob(f"{new_name}-*dist-info/METADATA")
     try:
-        meta_file = next(gen)
+        return next(gen)
     except StopIteration:
         # this is for cases where maintainers doesn't use proper casing
         pass
@@ -425,18 +458,27 @@ def get_package_metadata(name: str) -> Optional[Metadata]:
     new_name = make_case_ignore(new_name)
     gen = Path(LIBRARY_PATH).glob(f"{new_name}-*dist-info/METADATA")
     try:
-        meta_file = next(gen)
+        return next(gen)
     except StopIteration:
         pass
     # some packages such as boolean.py replace dot with underscore
     new_name = name.replace(".", "_")
     gen = Path(LIBRARY_PATH).glob(f"{new_name}-*dist-info/METADATA")
     try:
-        meta_file = next(gen)
+        return next(gen)
     except StopIteration:
         # this is for cases where maintainers doesn't use proper casing
         pass
+    raise ValueError(f"No metadata file found for package: {name}")
 
+
+def get_package_metadata(name: str) -> Optional[Metadata]:
+    """Get Python package metadata.
+
+    :param name: Name of package
+    :return: Package metadata
+    """
+    meta_file = get_package_metadata_file(name)
     return (
         Metadata.from_email(meta_file.read_text(encoding="utf-8"), validate=False)
         if meta_file

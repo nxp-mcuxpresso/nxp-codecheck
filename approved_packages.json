@@ -89,7 +89,7 @@
       "name": "click",
       "package": {
         "name": "click",
-        "license": "BSD License"
+        "license": "BSD-3-Clause"
       }
     },
     {
@@ -97,7 +97,7 @@
       "name": "colorama",
       "package": {
         "name": "colorama",
-        "license": "BSD License"
+        "license": "BSD-3-Clause"
       }
     },
     {
@@ -240,14 +240,14 @@
       "name": "idna",
       "package": {
         "name": "idna",
-        "license": "BSD License"
+        "license": "BSD-3-Clause"
       }
     },
     {
       "home_page": "https://github.com/python/importlib_metadata",
-      "name": "importlib_metadata",
+      "name": "importlib-metadata",
       "package": {
-        "name": "importlib_metadata",
+        "name": "importlib-metadata",
         "license": "Apache Software License"
       },
       "github": {
@@ -257,9 +257,9 @@
     },
     {
       "home_page": "https://github.com/python/importlib_metadata",
-      "name": "importlib-metadata",
+      "name": "importlib_metadata",
       "package": {
-        "name": "importlib-metadata",
+        "name": "importlib_metadata",
         "license": "Apache Software License"
       },
       "github": {
@@ -321,6 +321,18 @@
       "github": {
         "project_name": "pallets/jinja",
         "license": "BSD-3-Clause"
+      }
+    },
+    {
+      "home_page": "https://github.com/mypyc/librt",
+      "name": "librt",
+      "package": {
+        "name": "librt",
+        "license": "MIT"
+      },
+      "github": {
+        "project_name": "mypyc/librt",
+        "license": ""
       }
     },
     {
@@ -823,7 +835,7 @@
       "name": "tomli",
       "package": {
         "name": "tomli",
-        "license": "MIT License"
+        "license": "MIT"
       }
     },
     {
