@@ -23,7 +23,7 @@ classifiers = [
 ]
 
 
-[project.entry-points."console_scripts"]
+[project.scripts]
 codecheck = "codecheck.main:main"
 copyright = "codecheck.checker_copyright_year:main"
 cyclic_import = "codecheck.checker_cyclic_import:main"
@@ -49,17 +49,12 @@ version = { attr = "codecheck.__version__" }
 dependencies = { file = ["requirements.txt"] }
 
 [tool.bumpversion]
-current_version = "0.3.15"
+current_version = "0.3.16"
 
 [[tool.bumpversion.files]]
 filename = "codecheck/__init__.py"
 search = '__version__ = "{current_version}"'
 replace = '__version__ = "{new_version}"'
-
-[[tool.bumpversion.files]]
-filename = "SW_Content_Register_codecheck.txt"
-search = "{current_version}"
-replace = "{new_version}"
 
 
 [tool.pytest.ini_options]
@@ -149,15 +144,13 @@ checkers = [
 ]
 
 [tool.release-tools]
-disabled = ['docs']
+disabled = ['docs', 'scr']
 
 [tool.release-tools.blackduck_sca]
 project_name = "spsdk_codecheck"
 include_detector_types = ["pip"]
 sbom_location = "SBOM-spsdk_codecheck.spdx.json"
-
-[tool.release-tools.scr]
-scr_file = "SW_Content_Register_codecheck.txt"
+license = 'BSD 3-clause "New" or "Revised" License'
 
 [tool.release-tools.testpypi]
 test_cmd = "codecheck --help"
